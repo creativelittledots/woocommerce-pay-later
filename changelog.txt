@@ -1,0 +1,4 @@
+*** WooCommerce Custom Integration ***
+
+2015.04.22 - version 1.0.0
+ * Initial Release.
