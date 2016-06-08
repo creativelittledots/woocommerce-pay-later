@@ -28,8 +28,71 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 		
 		// Actions
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_filter( 'woocommerce_available_payment_gateways', array($this, 'remove_gateway_from_pay_page') );
+		add_filter( 'woocommerce_available_payment_gateways', array($this, 'remove_gateway_if_shopping_as_customer') );
+		add_filter( 'woocommerce_email_format_string_find', array($this, 'order_status_format_string_find') );
+		add_filter( 'woocommerce_email_format_string_replace', array($this, 'order_status_format_string_replace'), 10, 2 );
+		add_action( 'woocommerce_order_status_pending', array($this, 'send_pending_order_emails') );
+		add_action( 'wp', array($this, 'change_order_to_pending_on_order_received'), 8 );
 
+	}
+	
+	public function order_status_format_string_find( $find ) {
+	
+		$find['order-status'] = '{order_status}';
+		
+		return $find;
+		
+	}
+	
+	public function order_status_format_string_replace( $replace, $email ) {
+	
+		$replace['order-status'] = wc_get_order_status_name( $email->object->get_status() );
+		
+		return $replace;
+		
+	}
+	
+	public function send_pending_order_emails( $order_id ) {
+	
+		$emails = new WC_Emails();
+		
+		$order = wc_get_order( $order_id );
+			
+		$emails->customer_invoice( $order_id );
+		
+		$emails->emails['WC_Email_New_Order']->trigger( $order_id );
+		
+		$order->set_payment_method( $this );
+		
+	}
+	
+	public function change_order_to_pending_on_order_received() {
+		
+		if( class_exists('WC_Shop_As_Customer') && ! empty( $_GET['order_on_behalf'] ) && ! empty( $_GET['key'] ) && ! empty( $_GET['send_invoice'] ) ) {
+		
+			global $wp;
+			
+			if ( ! isset( $wp->query_vars['order-received'] ) )
+				return;
+				
+			// Bail if we're not shopping-as - don't display the special interface.
+			if ( ! WC_Shop_As_Customer::get_original_user() )
+				return;
+				
+			$order_id = $wp->query_vars['order-received'];
+
+			if ( isset( $order_id ) ) {
+	
+				$order = new WC_Order( absint( $order_id) );
+				
+				$order->update_status( 'pending' );
+				
+			}
+			
+			unset( $_GET['send_invoice'] );
+			
+		}
+			
 	}
 	
 	public function plugin_url() {
@@ -101,7 +164,7 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 		
 		$order = wc_get_order( $order_id );
 		
-		$order->update_status('pay-later', __( 'Awaiting payment', 'woocommerce' ) );
+		$order->update_status( 'pending' );
 		
 		// Reduce stock levels
 		$order->reduce_order_stock();
@@ -124,6 +187,18 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 				unset($_available_gateways['PayLater']);
 				
 			}
+			
+		}
+		
+		return $_available_gateways;
+		
+	}
+	
+	public function remove_gateway_if_shopping_as_customer($_available_gateways) {
+		
+		if( class_exists('WC_Shop_As_Customer') && WC_Shop_As_Customer::get_original_user() ) {
+			
+			unset($_available_gateways['PayLater']);
 			
 		}
 		
