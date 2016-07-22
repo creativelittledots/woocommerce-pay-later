@@ -28,6 +28,7 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 		
 		// Actions
 		add_filter( 'woocommerce_default_order_status', array($this, 'default_order_status') );
+		add_filter( 'woocommerce_valid_order_statuses_for_payment', array($this, 'valid_order_statuses_for_payment') );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_filter( 'woocommerce_available_payment_gateways', array($this, 'remove_gateway_if_shopping_as_customer') );
 		add_filter( 'woocommerce_email_format_string_find', array($this, 'order_status_format_string_find') );
@@ -40,6 +41,14 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 	public function default_order_status() {
 		
 		return 'on-hold';
+		
+	}
+	
+	public function valid_order_statuses_for_payment($statuses) {
+		
+		return array_merge($statuses, array(
+			'on-hold'
+		));
 		
 	}
 	
