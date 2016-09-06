@@ -1,6 +1,6 @@
 ## WooCommerce Pay Later Payment Gateway
 
-A Payment Gateway for WooCommerce that allows customers to Pay Later at Checkout.
+A Payment Gateway for WooCommerce that allows Customers to Pay Later at Checkout.
 
 After a Customer has checked via Pay Later, the Customer is directed to the Order Received page and is sent an invoice using the built in WooCommerce Customer Invoice email.
 

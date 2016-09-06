@@ -1,7 +1,7 @@
 <?php
 /*
 * Plugin Name: WooCommerce Pay Later Payment Gateway
-* Description: A Payment Gateway for WooCommerce that allows customers to Pay Later at Checkout.
+* Description: A Payment Gateway for WooCommerce that allows Customers to Pay Later at Checkout.
 * Version: 1.0.1
 * Author: Creative Little Dots
 * Author URI: http://creativelittledots.co.uk
