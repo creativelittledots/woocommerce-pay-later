@@ -1,8 +1,8 @@
 <?php
 /*
 * Plugin Name: WooCommerce Pay Later Payment Gateway
-* Description: A payment gateway that allows customers to pay later.
-* Version: 1.0
+* Description: A Payment Gateway for WooCommerce that allows customers to Pay Later at Checkout.
+* Version: 1.0.1
 * Author: Creative Little Dots
 * Author URI: http://creativelittledots.co.uk
 * Text Domain: woocommerce-pay-later
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Add the gateway to WooCommerce
  **/
-function add_pay_later_gateway( $methods ) {
+function wcpl_add_gateway( $methods ) {
     
     include_once 'includes/gateways/pay-later/class-wc-gateway-pay-later.php';
     
@@ -34,6 +34,6 @@ function add_pay_later_gateway( $methods ) {
 	
 }
 
-add_filter( 'woocommerce_payment_gateways', 'add_pay_later_gateway' );
+add_filter( 'woocommerce_payment_gateways', 'wcpl_add_gateway' );
 
 ?>

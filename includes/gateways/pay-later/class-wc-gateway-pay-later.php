@@ -1,18 +1,25 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 	
+/**
+ * Credit Card Payment Gateway
+ *
+ * @since       1.0.0
+ * @package		WooCommerce Pay Later/Classes
+ * @author 		Creative Little Dots
+ */
 class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 	
-	public $version 	= '1.0.0';
-	
+	/**
+	 * Constructor for the gateway.
+	 */
 	public function __construct() { 
 		
 		global $woocommerce;
 		
-		$this->id			= 'PayLater';
+		$this->id			= 'pay_later';
 		$this->has_fields 	= false;
 		$this->method_title = __('Pay Later', 'woocommerce-pay-later');
 		
@@ -28,9 +35,7 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 		
 		// Actions
 		add_filter( 'woocommerce_default_order_status', array($this, 'default_order_status') );
-		add_filter( 'woocommerce_valid_order_statuses_for_payment', array($this, 'valid_order_statuses_for_payment') );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_filter( 'woocommerce_available_payment_gateways', array($this, 'remove_gateway_if_shopping_as_customer') );
 		add_filter( 'woocommerce_email_format_string_find', array($this, 'order_status_format_string_find') );
 		add_filter( 'woocommerce_email_format_string_replace', array($this, 'order_status_format_string_replace'), 10, 2 );
 		add_action( 'woocommerce_order_status_pending', array($this, 'send_pending_order_emails') );
@@ -38,20 +43,24 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 
 	}
 	
-	public function default_order_status() {
+	/**
+	 * Change the default order status to on-hold so that pending order emails can be triggered
+	 */
+	public function default_order_status($default) {
 		
-		return 'on-hold';
+		if( $this->is_available() ) {
+			
+			$default = 'on-hold';
+			
+		}
+		
+		return $default;
 		
 	}
 	
-	public function valid_order_statuses_for_payment($statuses) {
-		
-		return array_merge($statuses, array(
-			'on-hold'
-		));
-		
-	}
-	
+	/**
+	 * Allow Order status to be accessible from emails
+	 */
 	public function order_status_format_string_find( $find ) {
 	
 		$find['order-status'] = '{order_status}';
@@ -60,6 +69,9 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 		
 	}
 	
+	/**
+	 * Replace Order status in emails
+	 */
 	public function order_status_format_string_replace( $replace, $email ) {
 	
 		$replace['order-status'] = wc_get_order_status_name( $email->object->get_status() );
@@ -68,6 +80,9 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 		
 	}
 	
+	/**
+	 * Trigger pending order emails and invoice email
+	 */
 	public function send_pending_order_emails( $order_id ) {
 	
 		$emails = new WC_Emails();
@@ -82,6 +97,9 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 		
 	}
 	
+	/**
+	 * WC Shop As Customer support on Order Received, because the default status is on hold we need to change these orders to pending
+	 */
 	public function change_order_to_pending_on_order_received() {
 		
 		if( class_exists('WC_Shop_As_Customer') && ! empty( $_GET['order_on_behalf'] ) && ! empty( $_GET['key'] ) && ! empty( $_GET['send_invoice'] ) ) {
@@ -97,7 +115,7 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 				
 			$order_id = $wp->query_vars['order-received'];
 
-			if ( isset( $order_id ) ) {
+			if ( ! empty( $order_id ) ) {
 	
 				$order = new WC_Order( absint( $order_id) );
 				
@@ -111,22 +129,10 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 			
 	}
 	
-	public function plugin_url() {
-	
-		return plugins_url( basename( plugin_dir_path(__FILE__) ), basename( __FILE__ ) );
-		
-	}
-
-	public function plugin_path() {
-		
-		return untrailingslashit( plugin_dir_path( __FILE__ ) );
-		
-	}
-	
 	/**
 	 * Initialise Gateway Settings Form Fields
 	 */
-	function init_form_fields() {
+	public function init_form_fields() {
 	
 		$this->form_fields = array(
 			'enabled' => array(
@@ -145,36 +151,34 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 							'title' => __( '<b>Description:</b>', 'woocommerce-pay-later' ), 
 							'type' => 'textarea', 
 							'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce-pay-later' ), 
-							'default' => __('Pay later, after you have parked.', 'woocommerce-pay-later')
+							'default' => __('Choose to pay later, we\'ll send you an invoice.', 'woocommerce-pay-later')
 						)
 			);
 	
-	} // End init_form_fields()
+	}
 	
 	/**
 	 * Admin Panel Options 
-	 * - Options for bits like 'title' and availability on a country-by-country basis
-	 *
-	 * @since 1.0.0
 	 */
 	public function admin_options() {
 
 		?>
+		
 		<h3>Pay Later Payment Gateway</h3>
+		
 		<p>Allow your customers to choose to pay later</p>
-		<p><b>Module Version:</b> 1.0 (For WooCommerce v2.1+)<br />
-		<b>Module Date:</b> 20 April 2015</p>
+		
 		<table class="form-table">
+			
 		<?php
-			// Generate the HTML For the settings form.
-			$this->generate_settings_html();
-		?>
-		</table><!--/.form-table-->
-		<?php
-	} // End admin_options()
+			
+		// Generate the HTML For the settings form.
+		$this->generate_settings_html();
+
+	}
 	
 	/**
-	 * Process the payment and return the result
+	 * Process the payment, set the Order to pending and return the result
 	 **/
 	public function process_payment( $order_id ) {
 		
@@ -185,41 +189,42 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 		// Reduce stock levels
 		$order->reduce_order_stock();
 		
+		// Remove cart
+		WC()->cart->empty_cart();
+		
 		return array(
 			'result' 	=> 'success',
-			'redirect'	=> $order->get_checkout_order_received_url()
+			'redirect'	=> apply_filters( 'wc_pay_later_order_received_url', $order->get_checkout_order_received_url(), $order, $this )
 		);
 		
 	}
 	
-	public function remove_gateway_from_pay_page($_available_gateways) {
+	/**
+	 * There are some scenerios where Pay Later should not be a checkout option, such as when on the Order Pay endpoint and when us WC Shop As Customer at checkout 
+	 */
+	public function is_available() {
 		
-		if(get_query_var('order-pay')) {
+		// if we are available lets run some checks
+		
+        if( $is_available = parent::is_available() ) { 
+	        
+	        if( class_exists('WC_Shop_As_Customer') && WC_Shop_As_Customer::get_original_user() ) {
+		        
+		        // WC Shop As Customer support on Checkout, remove Pay Later as an option because WC Shop As Customer already shows a button for this
 			
-			$order = new WC_Order(get_query_var('order-pay'));
-			
-			if($order->get_status() == 'pending') {
+				$is_available = false;
 				
-				unset($_available_gateways['PayLater']);
+			} else if( get_query_var('order-pay') ) {
+				
+				// Order Pay page should not display Pay Later
+				
+				$is_available = false;
 				
 			}
-			
-		}
-		
-		return $_available_gateways;
-		
-	}
-	
-	public function remove_gateway_if_shopping_as_customer($_available_gateways) {
-		
-		if( class_exists('WC_Shop_As_Customer') && WC_Shop_As_Customer::get_original_user() ) {
-			
-			unset($_available_gateways['PayLater']);
-			
-		}
-		
-		return $_available_gateways;
-		
-	}
+	        
+        }
+
+        return $is_available;
+    }
 	
 }

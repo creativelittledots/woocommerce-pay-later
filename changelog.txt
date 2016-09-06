@@ -1,4 +1,13 @@
-*** WooCommerce Custom Integration ***
+*** WooCommerce Pay Later ***
+ 
+06/09/2016 - version 1.0.1
+ * Change woocommerce_available_payment_gateways to use is_availble method instead
+ * Fixed is_available on Order Pay endpoint
+ * Removed redundant email templates
+ * Removed woocommerce_valid_order_statuses_for_payment filter
+ * General cleanup
+ * Updated Readme + docs
 
-2015.04.22 - version 1.0.0
+
+22/04/2015 - version 1.0.0
  * Initial Release.
