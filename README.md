@@ -23,6 +23,8 @@ function redirect_to_custom_page( $url, $order, $gateway ) {
 		'some_arbitrary' => 'text'
 	), 'http://somedomain.com');
 	
+	// results in a redirect to http://somedomain.com?order_id={{order_id}}&gateway_id=pay_later&some_arbitrary=text
+	
 }
 ```
 
