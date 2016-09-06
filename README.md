@@ -26,7 +26,7 @@ function redirect_to_custom_page( $url, $order, $gateway ) {
 }
 ```
 
-Orders that are checked out via Pay Later result in the status of **pending**. Customers can pay for the Order by click the **Pay button** in their My Account > Orders area.
+Orders that are checked out via Pay Later result in the status of **pending**. Customers can pay for the Order by clicking the **Pay button** in their My Account > Orders area.
 
 ## Installation
 
