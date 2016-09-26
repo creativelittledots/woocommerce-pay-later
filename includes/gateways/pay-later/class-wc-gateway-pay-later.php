@@ -73,8 +73,12 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 	 * Replace Order status in emails
 	 */
 	public function order_status_format_string_replace( $replace, $email ) {
+    	
+    	if( $email->object ) {
 	
-		$replace['order-status'] = wc_get_order_status_name( $email->object->get_status() );
+		    $replace['order-status'] = wc_get_order_status_name( $email->object->get_status() );
+		    
+        }
 		
 		return $replace;
 		
