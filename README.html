@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+</head>
+<body>
+<h2 id="woocommercepaylaterpaymentgateway">WooCommerce Pay Later Payment Gateway</h2>
+
+<p>A Payment Gateway for WooCommerce that allows Customers to Pay Later at Checkout.</p>
+
+<p>After a Customer has checked via Pay Later, the Customer is directed to the Order Received page and is sent an invoice using the built in WooCommerce Customer Invoice email.</p>
+
+<p>There is a filter you can use called <strong>wc_pay_later_order_received_url</strong> to direct to a custom page if you&#8217;d prefer to direct the Customer to a different page:</p>
+
+<pre><code class="php">apply_filters( 'wc_pay_later_order_received_url', $order-&gt;get_checkout_order_received_url(), $order, $this )
+</code></pre>
+
+<p>Which can be used in functions.php like this:</p>
+
+<pre><code class="php">add_filter( 'wc_pay_later_order_received_url', 'redirect_to_custom_page', 10, 3 );
+
+function redirect_to_custom_page( $url, $order, $gateway ) {
+    
+    return add_query_arg(array(
+        'order_id' =&gt; $order-&gt;id,
+        'gateway_id' =&gt; $gateway-&gt;id,
+        'some_arbitrary' =&gt; 'text'
+    ), 'http://somedomain.com');
+    
+    // results in a redirect to http://somedomain.com?order_id={{order_id}}&amp;gateway_id=pay_later&amp;some_arbitrary=text
+    
+}
+</code></pre>
+
+<p>Orders that are checked out via Pay Later result in the status of <strong>pending</strong>. Customers can pay for the Order by clicking the <strong>Pay button</strong> in their My Account &gt; Orders area.</p>
+
+<h2 id="installation">Installation</h2>
+
+<ol>
+<li>Upload the plugin to the <strong>/wp-content/plugins/</strong> directory</li>
+<li>Activate the plugin through the &#8216;Plugins&#8217; menu in WordPress</li>
+</ol>
+
+<h2 id="requirements">Requirements</h2>
+
+<p>PHP 5.4+</p>
+
+<p>Wordpress 4+</p>
+
+<p>WooCommerce 2.5+</p>
+
+<h2 id="license">License</h2>
+
+<p><a href="http://www.gnu.org/licenses/gpl-3.0.html">GNU General Public License v3.0</a></p>
+
+</body>
+</html>
