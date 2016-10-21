@@ -39,8 +39,21 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 		add_filter( 'woocommerce_email_format_string_find', array($this, 'order_status_format_string_find') );
 		add_filter( 'woocommerce_email_format_string_replace', array($this, 'order_status_format_string_replace'), 10, 2 );
 		add_action( 'woocommerce_order_status_pending', array($this, 'send_pending_order_emails') );
+		add_filter( 'woocommerce_valid_order_statuses_for_payment', array($this, 'valid_order_statuses_for_payment' ), 10, 2 );
 		add_action( 'wp', array($this, 'change_order_to_pending_on_order_received'), 8 );
 
+	}
+	
+	public function valid_order_statuses_for_payment($statuses, $order) {
+		
+		if( $order->is_pay_later ) {
+			
+			$statuses[] = 'on-hold';
+			
+		}
+		
+		return $statuses;
+		
 	}
 	
 	/**
@@ -189,6 +202,8 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 		
 		$order->update_status( 'pending' );
+		
+		update_post_meta( $order_id, '_is_pay_later', true );
 		
 		// Reduce stock levels
 		$order->reduce_order_stock();
