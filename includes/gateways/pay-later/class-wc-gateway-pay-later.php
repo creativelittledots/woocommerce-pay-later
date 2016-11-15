@@ -61,7 +61,7 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 	 */
 	public function default_order_status($default) {
 		
-		if( $this->is_available() ) {
+		if( WC()->session->set( 'chosen_payment_method') == $this->id ) {
 			
 			$default = 'on-hold';
 			
