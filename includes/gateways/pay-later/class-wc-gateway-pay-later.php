@@ -60,8 +60,8 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 	 * Change the default order status to on-hold so that pending order emails can be triggered
 	 */
 	public function default_order_status($default) {
-		
-		if( ! is_admin() && WC()->session->set( 'chosen_payment_method') == $this->id ) {
+		/* if( ! is_admin() && WC()->session->set( 'chosen_payment_method') == $this->id ) {*/
+		if( ! is_admin() && WC()->session->get( 'chosen_payment_method') == $this->id ) {
 			
 			$default = 'on-hold';
 			
