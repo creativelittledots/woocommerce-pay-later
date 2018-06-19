@@ -105,6 +105,8 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 		$emails = new WC_Emails();
 		
 		$order = wc_get_order( $order_id );
+		
+		if( ! $order->get_payment_method() == $this->id ) return;
 			
 		$emails->customer_invoice( $order_id );
 		
