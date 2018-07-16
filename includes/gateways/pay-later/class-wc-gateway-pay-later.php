@@ -203,7 +203,7 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 		
 		$order = wc_get_order( $order_id );
 		
-		$order->update_status( 'pending' );
+		$order->update_status( apply_filters( 'woocoommerce_pay_later_checkout_status', 'pending', $this ) );
 		
 		update_post_meta( $order_id, '_is_pay_later', true );
 		
