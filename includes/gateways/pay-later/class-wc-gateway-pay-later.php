@@ -60,8 +60,8 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 	 * Change the default order status to on-hold so that pending order emails can be triggered
 	 */
 	public function default_order_status($default) {
-		/* if( ! is_admin() && WC()->session->set( 'chosen_payment_method') == $this->id ) {*/
-		if( ! is_admin() && WC()->session->get( 'chosen_payment_method') == $this->id ) {
+
+		if( ! is_admin() && WC()->session && WC()->session->get( 'chosen_payment_method') == $this->id ) {
 			
 			$default = 'on-hold';
 			
@@ -101,18 +101,22 @@ class WC_Gateway_Pay_Later extends WC_Payment_Gateway {
 	 * Trigger pending order emails and invoice email
 	 */
 	public function send_pending_order_emails( $order_id ) {
+		
+		if( apply_filters( 'woocommerce_pay_later_send_invoice_on_pending_status', true, $order_id ) ) {
 	
-		$emails = new WC_Emails();
-		
-		$order = wc_get_order( $order_id );
-		
-		if( ! $order->get_payment_method() == $this->id ) return;
+			$emails = new WC_Emails();
 			
-		$emails->customer_invoice( $order_id );
-		
-		$emails->emails['WC_Email_New_Order']->trigger( $order_id );
-		
-		$order->set_payment_method( $this );
+			$order = wc_get_order( $order_id );
+			
+			if( $order->get_payment_method() !== $this->id ) return;
+				
+			$emails->customer_invoice( $order_id );
+			
+			$emails->emails['WC_Email_New_Order']->trigger( $order_id );
+			
+			$order->set_payment_method( $this );
+			
+		}
 		
 	}
 	
